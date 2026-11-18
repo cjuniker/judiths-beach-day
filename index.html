@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:border-box}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Judith's Beach Day</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: one arcade "cabinet" on a night-sea page, field guide underneath. Single committed dark world. */
+:root{
+  --sea-deep:#082a3a;
+  --sea:#0f4a60;
+  --sand:#f3d9a4;
+  --buoy:#ff6a3d;
+  --foam:#eaf7f4;
+  --ink:#0b2230;
+  --muted:#9cc3c9;
+  --lime:#c6f432;
+  --display:"Lilita One","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--sea-deep)}
+body{
+  color:var(--foam);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-block:20px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,44px);line-height:1.05;margin:0;color:var(--sand);text-wrap:balance}
+h1 span{color:var(--buoy)}
+.best{font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-variant-numeric:tabular-nums}
+.best b{color:var(--sand);font-size:18px;letter-spacing:0;margin-left:6px}
+
+.frame{position:relative;border:3px solid var(--sand);border-radius:16px;overflow:hidden;background:var(--sand)}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/10;touch-action:none;cursor:crosshair;outline:none}
+canvas:focus-visible{box-shadow:inset 0 0 0 3px var(--lime)}
+
+.ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,42,58,.74);text-align:center}
+.ov-card{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:520px}
+.eyebrow{margin:0;font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--lime)}
+.ov h2{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(28px,6.5vw,60px);line-height:1;color:var(--sand);text-wrap:balance}
+.ov-text{margin:0;color:var(--foam);font-size:16px;text-wrap:balance}
+.hint{margin:0;color:var(--muted);font-size:13px;font-weight:700}
+.ov button{
+  margin-top:4px;font-family:var(--display);font-size:22px;letter-spacing:.02em;
+  color:var(--ink);background:var(--buoy);border:0;border-radius:999px;padding:10px 30px;cursor:pointer;
+  box-shadow:0 4px 0 #b84220;transition:transform .08s ease, box-shadow .08s ease;
+}
+.ov button:hover{transform:translateY(-1px)}
+.ov button:active{transform:translateY(3px);box-shadow:0 1px 0 #b84220}
+.ov button:focus-visible{outline:3px solid var(--foam);outline-offset:3px}
+@media (max-width:600px){.ov-text,.hint{display:none}.ov button{font-size:18px;padding:8px 22px}}
+.dig{
+  position:absolute;right:12px;bottom:12px;display:none;
+  font-family:var(--display);font-size:20px;color:var(--ink);background:var(--lime);
+  border:0;border-radius:999px;padding:14px 24px;box-shadow:0 4px 0 #7d9c1c;touch-action:manipulation;cursor:pointer;
+}
+.dig:active{transform:translateY(3px);box-shadow:0 1px 0 #7d9c1c}
+.dig:focus-visible{outline:3px solid var(--foam);outline-offset:3px}
+@media (pointer:coarse){.dig{display:block}}
+.note{margin:0;color:var(--muted);font-size:13px;line-height:1.4}
+.note b{color:var(--lime)}
+
+.guide{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+.panel{background:var(--sea);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.panel h3{margin:0;font-family:var(--display);font-weight:400;font-size:20px;color:var(--sand)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td{padding:6px 0;vertical-align:top;border-top:1px solid rgba(156,195,201,.18)}
+tr:first-child td{border-top:0}
+td.n{font-weight:800;color:var(--foam);white-space:nowrap;padding-right:10px}
+td.v{font-family:var(--display);color:var(--buoy);font-size:18px;text-align:right;white-space:nowrap;padding-left:10px}
+td small{display:block;color:var(--muted);font-size:13px;line-height:1.35}
+.bar{display:block;height:8px;border-radius:4px;background:rgba(156,195,201,.18);margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--lime);border-radius:4px}
+.panel ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--foam)}
+.panel li::marker{color:var(--buoy)}
+.panel li b{color:var(--sand)}
+@media (prefers-reduced-motion:reduce){.ov button{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Judith's <span>Beach Day</span></h1>
+    <div class="best">Beach record <b id="bestTop">0</b></div>
+  </header>
+
+  <div class="frame">
+    <canvas id="game" tabindex="0" aria-label="Game: steer Judith the German shepherd's wheelchair around the beach"></canvas>
+    <div class="ov" id="ov">
+      <div class="ov-card">
+        <p class="eyebrow" id="ovEyebrow">75-second round</p>
+        <h2 id="ovTitle">Judith's Beach Day</h2>
+        <p class="ov-text" id="ovText">Roll Judith's wheelchair across the sand, nip ankles near the water for bigger points, and dig trenches to trap the lifeguards.</p>
+        <button id="ovBtn" type="button">Start rolling</button>
+        <p class="hint" id="ovHint">Arrow keys or WASD to roll &middot; Space to dig &middot; P to pause &middot; on a phone, drag to roll</p>
+      </div>
+    </div>
+    <button class="dig" id="digBtn" type="button" hidden>Dig</button>
+  </div>
+
+  <section class="guide">
+    <div class="panel">
+      <h3>Who's on the beach</h3>
+      <table>
+        <tr><td class="n">Sunbather<small>Asleep on a towel. Easy points.</small></td><td class="v">10</td></tr>
+        <tr><td class="n">Walker<small>Bolts once Judith rolls close.</small></td><td class="v">20</td></tr>
+        <tr><td class="n">Surfer<small>Heading for the waves. Get them before they paddle out.</small></td><td class="v">25</td></tr>
+        <tr><td class="n">Jogger<small>Fast, and always on the wet sand.</small></td><td class="v">40</td></tr>
+        <tr><td class="n">Trapped lifeguard<small>Stuck in one of Judith's trenches.</small></td><td class="v">60</td></tr>
+      </table>
+      <p class="note">Points are multiplied by how close the person is to the water: <b>x3</b> at the shoreline down to <b>x1</b> by the boardwalk. The scale is marked on the left edge of the sand.</p>
+    </div>
+    <div class="panel">
+      <h3>Rolling conditions</h3>
+      <table>
+        <tr><td class="n">Wet sand<small>Packed firm by the tide. Fastest.</small><span class="bar"><i style="width:100%"></i></span></td></tr>
+        <tr><td class="n">Boardwalk<small>Smooth planks along the bottom.</small><span class="bar"><i style="width:94%"></i></span></td></tr>
+        <tr><td class="n">Dry sand<small>Soft. The wheels sink in.</small><span class="bar"><i style="width:67%"></i></span></td></tr>
+        <tr><td class="n">Shallow water<small>She can wade in, barely.</small><span class="bar"><i style="width:27%"></i></span></td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>House rules</h3>
+      <ul>
+        <li><b>Combo:</b> bite again within 2.6 seconds to raise the multiplier, up to x5.</li>
+        <li><b>Lifeguards:</b> a couple of quick bites brings the first one down from the tower, and more bring his backup. Getting caught stuns Judith, resets the combo and costs 3 seconds.</li>
+        <li><b>Trenches:</b> press Space (or Dig) to dig a hole in front of Judith. A lifeguard who runs into it is stuck for a few seconds: +30, and he's worth 60 if she bites him while he's down. Up to 3 open holes at a time.</li>
+        <li><b>Tennis ball:</b> grab it for 5 seconds of zoomies.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+const W = 960, H = 600, ROUND = 75, COMBO_WINDOW = 2.6;
+const cv = document.getElementById('game');
+const ctx = cv.getContext('2d');
+const ov = document.getElementById('ov');
+const ovEyebrow = document.getElementById('ovEyebrow');
+const ovTitle = document.getElementById('ovTitle');
+const ovText = document.getElementById('ovText');
+const ovBtn = document.getElementById('ovBtn');
+const ovHint = document.getElementById('ovHint');
+const bestTop = document.getElementById('bestTop');
+const digBtn = document.getElementById('digBtn');
+
+let scale = 1;
+function resize() {
+  const r = cv.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.max(1, Math.round(r.width * dpr));
+  cv.height = Math.max(1, Math.round(r.height * dpr));
+  scale = cv.width / W;
+}
+if (window.ResizeObserver) new ResizeObserver(resize).observe(cv);
+window.addEventListener('resize', resize);
+resize();
+
+function loadBest() { try { return +localStorage.getItem('frieda-best') || 0; } catch (e) { return 0; } }
+function saveBest(v) { try { localStorage.setItem('frieda-best', String(v)); } catch (e) {} }
+
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+const SKIN = ['#f1c9a5', '#d9a27a', '#a86b4a', '#7a4a32', '#f5d6c0', '#c58c62'];
+const SHIRT = ['#ff6a3d', '#2bb3a3', '#ffd23f', '#7b5cff', '#ff4f8b', '#3a86ff', '#ffffff'];
+const SHORTS = ['#1d3557', '#264653', '#e76f51', '#2a9d8f', '#6d597a', '#f4a261'];
+const HAIR = ['#2b1d14', '#5a3a22', '#d9b26a', '#1a1a1a', '#a0522d', '#e8e1d0'];
+const TOWEL = [['#ff6a3d', '#ffffff'], ['#2bb3a3', '#ffd23f'], ['#3a86ff', '#ffffff'], ['#ff4f8b', '#ffd23f'], ['#7b5cff', '#eaf7f4']];
+const UMBRELLA = ['#ff6a3d', '#2bb3a3', '#ffd23f', '#ff4f8b', '#3a86ff'];
+const OUCH = ['OW!', 'YEOWCH!', 'HEY!', 'MY ANKLE!', 'AAAH!', 'NOT COOL!', 'OUCH!'];
+
+const TYPES = {
+  sunbather: { pts: 10, w: 3 },
+  walker: { pts: 20, w: 3 },
+  surfer: { pts: 25, w: 2 },
+  jogger: { pts: 40, w: 2 },
+};
+const MAXV = { water: 70, wet: 255, dry: 170, boardwalk: 240 };
+const TOWER = { x: 905, y: 500 };
+const HEAT_MAX = 4.5;
+
+const S = { mode: 'title', t: 0, time: ROUND, score: 0, bites: 0, combo: 1, comboT: 0, maxCombo: 1,
+  best: loadBest(), people: [], fx: [], texts: [], heat: 0, spawnT: 0, ballT: 8, ball: null, shake: 0 };
+bestTop.textContent = S.best;
+let dog, guards;
+
+function tideY() { return 118 + Math.sin(S.t * 0.25) * 16; }
+// x3 right at the waterline, falling to x1 about 375px up the beach
+function shoreMult(y) {
+  const d = y - tideY();
+  return Math.round((1 + 2 * clamp(1 - (d - 15) / 360, 0, 1)) * 10) / 10;
+}
+function surface(y) {
+  const ty = tideY();
+  if (y < ty + 4) return 'water';
+  if (y < ty + 75) return 'wet';
+  if (y > 548) return 'boardwalk';
+  return 'dry';
+}
+
+function reset() {
+  S.time = ROUND; S.score = 0; S.bites = 0; S.combo = 1; S.comboT = 0; S.maxCombo = 1;
+  S.people = []; S.fx = []; S.texts = []; S.heat = 0; S.spawnT = 0.5; S.ballT = 8; S.ball = null; S.shake = 0;
+  S.trenches = [];
+  dog = { x: 300, y: 340, vx: 0, vy: 0, facing: 1, wheel: 0, stun: 0, biteT: 0, biteCd: 0, boost: 0, speed: 0, dig: 0, digCd: 0 };
+  guards = [
+    { x: 842, y: 512, home: { x: 842, y: 512 }, state: 'tower', facing: -1, phase: 0, whistle: 0, trap: 0, need: 2, skin: '#c58c62', hair: '#2b1d14' },
+    { x: 876, y: 532, home: { x: 876, y: 532 }, state: 'tower', facing: -1, phase: 0, whistle: 0, trap: 0, need: 3.5, skin: '#f1c9a5', hair: '#d9b26a' },
+  ];
+  for (let i = 0; i < 6; i++) spawn(i < 3 ? 'sunbather' : null, true);
+}
+
+function spawn(type, initial) {
+  if (!type) {
+    const tot = Object.values(TYPES).reduce((s, t) => s + t.w, 0);
+    let r = Math.random() * tot;
+    for (const k in TYPES) { r -= TYPES[k].w; if (r <= 0) { type = k; break; } }
+    type = type || 'walker';
+  }
+  const p = { type, pts: TYPES[type].pts, state: 'walk', t: 0, phase: rnd(0, 6), facing: 1, vx: 0, vy: 0,
+    skin: pick(SKIN), shirt: pick(SHIRT), shorts: pick(SHORTS), hair: pick(HAIR), gone: false };
+  const ty = tideY();
+  if (type === 'sunbather') {
+    let x = 0, y = 0, ok = false;
+    for (let i = 0; i < 16 && !ok; i++) {
+      x = rnd(70, 800); y = rnd(ty + 125, 515);
+      ok = S.people.every(o => Math.hypot(o.x - x, o.y - y) > 95) &&
+           Math.hypot(dog.x - x, dog.y - y) > 150;
+    }
+    if (!ok) return;
+    p.x = x; p.y = y; p.state = 'lying'; p.towel = pick(TOWEL);
+    p.facing = Math.random() < 0.5 ? 1 : -1; p.pop = 0;
+    p.umbrella = Math.random() < 0.55 ? pick(UMBRELLA) : null;
+  } else if (type === 'walker') {
+    const left = Math.random() < 0.5;
+    p.dir = left ? 1 : -1;
+    p.x = initial ? rnd(100, 800) : (left ? -30 : W + 30);
+    p.y = rnd(ty + 110, 520); p.vx = p.dir * rnd(45, 65); p.facing = p.dir;
+  } else if (type === 'surfer') {
+    p.x = rnd(80, 800); p.y = initial ? rnd(300, 500) : H + 20; p.vy = -rnd(48, 62);
+    p.facing = Math.random() < 0.5 ? 1 : -1; p.board = pick(['#ffd23f', '#ff4f8b', '#2bb3a3', '#ffffff']);
+  } else {
+    const left = Math.random() < 0.5;
+    p.dir = left ? 1 : -1;
+    p.x = initial ? rnd(100, 800) : (left ? -30 : W + 30);
+    p.vx = p.dir * rnd(185, 215); p.facing = p.dir; p.lane = rnd(20, 54); p.y = ty + p.lane;
+  }
+  S.people.push(p);
+}
+
+function addText(x, y, txt, col, size, life) {
+  S.texts.push({ x, y, txt, col, size: size || 20, t: 0, life: life || 1.1 });
+}
+
+/* ---------- input ---------- */
+const keys = new Set();
+let ptr = null;
+function toWorld(e) {
+  const r = cv.getBoundingClientRect();
+  return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
+}
+cv.addEventListener('pointerdown', e => {
+  if (S.mode !== 'play') return;
+  ptr = toWorld(e);
+  try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  e.preventDefault();
+});
+cv.addEventListener('pointermove', e => { if (ptr) ptr = toWorld(e); });
+const endPtr = () => { ptr = null; };
+cv.addEventListener('pointerup', endPtr);
+cv.addEventListener('pointercancel', endPtr);
+
+window.addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'BUTTON') return;
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
+  keys.add(e.code);
+  if (e.repeat) return;
+  if (S.mode === 'title' || S.mode === 'over') {
+    if (e.code === 'Space' || e.code === 'Enter') start();
+  } else if (S.mode === 'play') {
+    if (e.code === 'KeyP' || e.code === 'Escape') pause();
+    else if (e.code === 'Space' || e.code === 'KeyE') startDig();
+  } else if (S.mode === 'paused') {
+    if (['KeyP', 'Escape', 'Space', 'Enter'].includes(e.code)) resume();
+  }
+});
+window.addEventListener('keyup', e => keys.delete(e.code));
+window.addEventListener('blur', () => { keys.clear(); ptr = null; });
+document.addEventListener('visibilitychange', () => { if (document.hidden && S.mode === 'play') pause(); });
+ovBtn.addEventListener('click', () => { if (S.mode === 'paused') resume(); else start(); });
+digBtn.addEventListener('pointerdown', e => { e.preventDefault(); startDig(); });
+digBtn.addEventListener('click', e => { if (e.detail === 0) startDig(); });
+
+function showOverlay(eyebrow, title, text, btn, hint) {
+  ovEyebrow.textContent = eyebrow; ovTitle.textContent = title; ovText.textContent = text;
+  ovBtn.textContent = btn; ovHint.hidden = !hint;
+  ov.hidden = false;
+  try { ovBtn.focus({ preventScroll: true }); } catch (e) {}
+}
+function start() {
+  reset(); S.mode = 'play'; ov.hidden = true; digBtn.hidden = false;
+  try { cv.focus({ preventScroll: true }); } catch (e) {}
+}
+function pause() {
+  S.mode = 'paused'; keys.clear(); ptr = null; digBtn.hidden = true;
+  showOverlay('Paused', 'Taking a breather', 'Judith is waiting with her tongue out.', 'Resume', true);
+}
+function resume() {
+  S.mode = 'play'; ov.hidden = true; digBtn.hidden = false;
+  try { cv.focus({ preventScroll: true }); } catch (e) {}
+}
+function endRound() {
+  S.mode = 'over'; keys.clear(); ptr = null; digBtn.hidden = true;
+  const record = S.score > S.best;
+  if (record) { S.best = S.score; saveBest(S.best); bestTop.textContent = S.best; }
+  const bitesTxt = S.bites === 1 ? '1 bite' : S.bites + ' bites';
+  showOverlay(record ? 'New beach record' : "Time's up",
+    S.score + ' points',
+    bitesTxt + ' · best combo x' + S.maxCombo + ' · record ' + S.best,
+    'Play again', true);
+}
+
+/* ---------- update ---------- */
+function updateDog(dt) {
+  let ax = 0, ay = 0;
+  if (dog.stun <= 0 && S.mode === 'play') {
+    if (keys.has('ArrowLeft') || keys.has('KeyA')) ax -= 1;
+    if (keys.has('ArrowRight') || keys.has('KeyD')) ax += 1;
+    if (keys.has('ArrowUp') || keys.has('KeyW')) ay -= 1;
+    if (keys.has('ArrowDown') || keys.has('KeyS')) ay += 1;
+    if (ptr) {
+      const dx = ptr.x - dog.x, dy = ptr.y - dog.y, d = Math.hypot(dx, dy);
+      if (d > 14) { ax = dx / d; ay = dy / d; }
+    }
+    const m = Math.hypot(ax, ay);
+    if (m > 1) { ax /= m; ay /= m; }
+  }
+  if (dog.dig > 0) {
+    ax = 0; ay = 0; dog.dig -= dt;
+    if (Math.random() < dt * 40) {
+      S.fx.push({ x: dog.x + dog.facing * 36, y: dog.y - 4, vx: -dog.facing * rnd(60, 170), vy: rnd(-170, -60), life: 0.6, t: 0, c: pick(['#8a6236', '#c79a5c', '#6b4a28']), r: rnd(2, 3.5) });
+    }
+    if (dog.dig <= 0) { dog.dig = 0; finishDig(); }
+  }
+  dog.digCd = Math.max(0, dog.digCd - dt);
+  const surf = surface(dog.y);
+  const mx = MAXV[surf] * (dog.boost > 0 ? 1.4 : 1);
+  const k = Math.min(1, dt * (dog.dig > 0 ? 8 : (ax || ay) ? 3.2 : 2.2));
+  dog.vx += (ax * mx - dog.vx) * k;
+  dog.vy += (ay * mx * 0.85 - dog.vy) * k;
+  dog.x += dog.vx * dt; dog.y += dog.vy * dt;
+  dog.x = clamp(dog.x, 34, W - 34);
+  dog.y = clamp(dog.y, tideY() - 30, 588);
+  dog.speed = Math.hypot(dog.vx, dog.vy);
+  if (Math.abs(dog.vx) > 12) dog.facing = Math.sign(dog.vx);
+  dog.wheel += dog.speed * dt / 13;
+  dog.stun = Math.max(0, dog.stun - dt);
+  dog.biteT = Math.max(0, dog.biteT - dt);
+  dog.biteCd = Math.max(0, dog.biteCd - dt);
+  dog.boost = Math.max(0, dog.boost - dt);
+  if (dog.speed > 110 && Math.random() < dt * 22) {
+    const c = surf === 'water' ? 'rgba(234,247,244,.9)' : surf === 'wet' ? 'rgba(130,95,55,.55)' : surf === 'boardwalk' ? 'rgba(120,80,40,.35)' : 'rgba(225,192,130,.9)';
+    S.fx.push({ x: dog.x - dog.facing * 24, y: dog.y - 2, vx: -dog.vx * 0.2 + rnd(-20, 20), vy: rnd(-45, -10), life: 0.5, t: 0, c, r: rnd(2, 4) });
+  }
+}
+
+function tryBite() {
+  if (dog.stun > 0 || dog.biteCd > 0) return;
+  const fx = dog.x + dog.facing * 40, fy = dog.y;
+  for (const g of guards) {
+    if (g.state === 'trapped' && !g.bitten && Math.abs(g.x - fx) < 30 && Math.abs(g.y - fy) < 20) { biteGuard(g); return; }
+  }
+  for (const p of S.people) {
+    if (p.state === 'bitten' || p.state === 'paddle') continue;
+    const rx = p.state === 'lying' ? 46 : 22;
+    if (Math.abs(p.x - fx) < rx && Math.abs(p.y - fy) < 18) { bite(p); return; }
+  }
+}
+
+function scoreBite(base, x, y) {
+  dog.biteT = 0.25; dog.biteCd = 0.3;
+  S.combo = S.comboT > 0 ? Math.min(5, S.combo + 1) : 1;
+  S.comboT = COMBO_WINDOW;
+  S.maxCombo = Math.max(S.maxCombo, S.combo);
+  const m = shoreMult(y);
+  const pts = Math.round(base * m * S.combo);
+  S.score += pts; S.bites++; S.shake = 0.16;
+  addText(x, y - 52, '+' + pts, '#ffd23f', 26);
+  const parts = [];
+  if (m >= 1.2) parts.push('shore x' + m.toFixed(1));
+  if (S.combo > 1) parts.push('combo x' + S.combo);
+  if (parts.length) addText(x, y - 30, parts.join('  '), '#c6f432', 15);
+  for (let i = 0; i < 12; i++) {
+    S.fx.push({ x, y: y - 12, vx: rnd(-130, 130), vy: rnd(-170, -40), life: 0.55, t: 0, c: pick(['#ffffff', '#ffd23f', '#ff6a3d']), r: rnd(2, 4) });
+  }
+}
+
+function bite(p) {
+  p.state = 'bitten'; p.hop = 0; p.vx = 0; p.vy = 0;
+  S.heat += 1;
+  addText(p.x, p.y - 80, pick(OUCH), '#ffffff', 20);
+  scoreBite(p.pts, p.x, p.y);
+}
+
+function biteGuard(g) {
+  g.bitten = true;
+  addText(g.x, g.y - 80, pick(['MY WHISTLE HAND!', 'NOT IN THE HOLE!', 'OW OW OW!']), '#ffffff', 20);
+  scoreBite(60, g.x, g.y);
+}
+
+function startDig() {
+  if (S.mode !== 'play' || dog.dig > 0 || dog.digCd > 0 || dog.stun > 0) return;
+  if (S.trenches.filter(t => !t.used).length >= 3) { addText(dog.x, dog.y - 92, '3 holes already open', '#ffffff', 17, 0.9); dog.digCd = 0.5; return; }
+  const s = surface(dog.y);
+  if (s === 'water' || s === 'boardwalk') {
+    addText(dog.x, dog.y - 92, s === 'water' ? 'Too wet to dig' : 'Can’t dig planks', '#ffffff', 17, 0.9);
+    dog.digCd = 0.5; return;
+  }
+  dog.dig = 0.5;
+}
+
+function finishDig() {
+  const tx = clamp(dog.x + dog.facing * 44, 30, W - 30), ty = dog.y;
+  if (S.trenches.some(t => Math.hypot(t.x - tx, t.y - ty) < 50)) { dog.digCd = 0.3; return; }
+  S.trenches.push({ x: tx, y: ty, life: 14, grow: 0, used: false, wet: surface(ty) === 'wet' });
+  dog.digCd = 0.8;
+}
+
+function updatePeople(dt) {
+  const ty = tideY();
+  for (const p of S.people) {
+    p.t += dt;
+    if (p.state === 'lying') { p.pop = Math.min(1, p.pop + dt * 3); continue; }
+    if (p.state === 'bitten') {
+      p.hop += dt;
+      if (p.hop > 0.45) {
+        if (!p.escape) p.escape = { x: p.x < W / 2 ? -90 : W + 90, y: clamp(p.y + rnd(-40, 80), ty + 50, 570) };
+        const dx = p.escape.x - p.x, dy = p.escape.y - p.y, d = Math.hypot(dx, dy) || 1;
+        p.vx = dx / d * 260; p.vy = dy / d * 260; p.facing = Math.sign(p.vx) || 1;
+        p.x += p.vx * dt; p.y += p.vy * dt; p.phase += dt * 18;
+        if (d < 24) p.gone = true;
+      }
+      continue;
+    }
+    const dd = Math.hypot(dog.x - p.x, dog.y - p.y);
+    const scary = dog.stun <= 0 && S.mode === 'play';
+    if (p.type === 'walker') {
+      if (p.state === 'walk' && dd < 105 && scary) { p.state = 'flee'; addText(p.x, p.y - 76, '!', '#ffd23f', 26, 0.6); }
+      if (p.state === 'flee') {
+        const ax = p.x - dog.x, ay = p.y - dog.y, d = Math.hypot(ax, ay) || 1;
+        p.vx = ax / d * 145; p.vy = ay / d * 145;
+        if (dd > 230 || !scary) { p.state = 'walk'; p.vx = p.dir * 55; p.vy = 0; }
+      }
+      p.phase += dt * (p.state === 'flee' ? 16 : 8);
+    } else if (p.type === 'surfer') {
+      p.phase += dt * 8;
+      if (p.state === 'walk' && p.y < ty + 14) { p.state = 'paddle'; p.vy = -22; p.vx = 0; p.fade = 0; }
+      if (p.state === 'paddle') { p.fade += dt; if (p.fade > 1.2) p.gone = true; }
+      else if (dd < 85 && scary) p.vx = Math.sign(p.x - dog.x || 1) * 90;
+      else p.vx *= Math.pow(0.1, dt);
+    } else if (p.type === 'jogger') {
+      p.phase += dt * 16;
+    }
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.type === 'jogger') p.y = ty + p.lane;
+    if (p.type === 'walker') p.y = clamp(p.y, ty + 40, 575);
+    if (Math.abs(p.vx) > 5) p.facing = Math.sign(p.vx);
+    if (p.x < -95 || p.x > W + 95 || p.y > H + 60) p.gone = true;
+  }
+  S.people = S.people.filter(p => !p.gone);
+}
+
+function updateGuard(g, dt) {
+  g.whistle = Math.max(0, g.whistle - dt);
+  if (g.state === 'tower' && S.heat >= g.need) {
+    g.state = 'chase';
+    addText(g.x, g.y - 86, g.need > 2 ? 'BACKUP COMING!' : 'HEY! NO BITING!', '#ff6a3d', 20, 1.4);
+  }
+  if (g.state === 'trapped') {
+    g.trap -= dt; g.phase += dt * 10;
+    if (g.trap <= 0) {
+      g.state = 'return'; g.bitten = false;
+      if (g.hole) g.hole.gone = true;
+      g.hole = null;
+    }
+    return;
+  }
+  if (g.state === 'chase' || g.state === 'return') {
+    for (const tr of S.trenches) {
+      if (!tr.used && tr.grow >= 1 && Math.abs(g.x - tr.x) < 28 && Math.abs(g.y - tr.y) < 13) {
+        tr.used = true; g.hole = tr; g.state = 'trapped'; g.trap = 4.5; g.x = tr.x; g.y = tr.y; g.bitten = false;
+        S.score += 30; S.shake = 0.12;
+        addText(tr.x, tr.y - 70, 'GOTCHA! +30', '#c6f432', 24, 1.3);
+        return;
+      }
+    }
+  }
+  if (g.state === 'chase') {
+    const dx = dog.x - g.x, dy = dog.y - g.y, d = Math.hypot(dx, dy) || 1;
+    const sp = Math.min(195, 150 + S.heat * 9);
+    g.x += dx / d * sp * dt; g.y += dy / d * sp * 0.9 * dt;
+    g.facing = Math.sign(dx) || 1; g.phase += dt * 16;
+    if (d < 30 && dog.stun <= 0) {
+      dog.stun = 1.6; S.combo = 1; S.comboT = 0; S.heat = 0;
+      S.time = Math.max(0, S.time - 3);
+      g.state = 'return'; g.whistle = 1.2; S.shake = 0.25;
+      dog.vx = dx / d * 140; dog.vy = dy / d * 140;
+      addText(dog.x, dog.y - 92, 'TWEEEET!  −3s', '#ffffff', 26, 1.4);
+    } else if (S.heat < g.need - 1.4) g.state = 'return';
+  } else if (g.state === 'return') {
+    const dx = g.home.x - g.x, dy = g.home.y - g.y, d = Math.hypot(dx, dy);
+    if (d < 4) { g.state = 'tower'; g.x = g.home.x; g.y = g.home.y; g.facing = -1; }
+    else { g.x += dx / d * 110 * dt; g.y += dy / d * 110 * dt; g.facing = Math.sign(dx) || 1; g.phase += dt * 10; }
+    if (S.heat >= g.need + 0.5) g.state = 'chase';
+  }
+}
+
+function update(dt) {
+  S.t += dt;
+  const playing = S.mode === 'play';
+  if (playing) {
+    S.time -= dt;
+    if (S.comboT > 0) { S.comboT -= dt; if (S.comboT <= 0) S.combo = 1; }
+    updateDog(dt);
+    tryBite();
+    S.heat = Math.max(0, S.heat - dt * 0.13);
+    for (const g of guards) updateGuard(g, dt);
+    for (const tr of S.trenches) { tr.grow = Math.min(1, tr.grow + dt * 4); if (!tr.used) tr.life -= dt; }
+    S.trenches = S.trenches.filter(tr => tr.life > 0 && !tr.gone);
+    S.ballT -= dt;
+    if (!S.ball && S.ballT <= 0) S.ball = { x: rnd(80, 820), y: rnd(tideY() + 90, 520), t: 0 };
+    if (S.ball) {
+      S.ball.t += dt;
+      if (Math.hypot(dog.x + dog.facing * 30 - S.ball.x, dog.y - S.ball.y) < 36) {
+        dog.boost = 5; S.ball = null; S.ballT = rnd(12, 18);
+        addText(dog.x, dog.y - 92, 'ZOOMIES!', '#c6f432', 26);
+      } else if (S.ball.t > 10) { S.ball = null; S.ballT = rnd(6, 10); }
+    }
+  }
+  updatePeople(dt);
+  S.spawnT -= dt;
+  if (S.spawnT <= 0) {
+    const active = S.people.filter(p => p.state !== 'bitten' && p.state !== 'paddle').length;
+    if (active < 8) spawn(null);
+    const prog = playing ? 1 - S.time / ROUND : 0;
+    S.spawnT = rnd(0.9, 1.8) * (1 - prog * 0.35);
+  }
+  for (const f of S.fx) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 380 * dt; }
+  S.fx = S.fx.filter(f => f.t < f.life);
+  for (const tx of S.texts) { tx.t += dt; tx.y -= 32 * dt; }
+  S.texts = S.texts.filter(tx => tx.t < tx.life);
+  S.shake = Math.max(0, S.shake - dt);
+  if (playing && S.time <= 0) { S.time = 0; endRound(); }
+}
+
+/* ---------- drawing helpers ---------- */
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath(); ctx.fill();
+}
+function circle(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+function ellipse(x, y, rx, ry) { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
+function limb(x1, y1, x2, y2, w, c) {
+  ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+}
+function shadow(x, y, rx, ry) { ctx.fillStyle = 'rgba(70,45,15,.22)'; ellipse(x, y, rx, ry); }
+function poly(pts) { ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); ctx.closePath(); ctx.fill(); }
+
+/* ---------- background ---------- */
+const bg = document.createElement('canvas');
+bg.width = W * 2; bg.height = H * 2;
+(function paintBg() {
+  const b = bg.getContext('2d');
+  b.scale(2, 2);
+  const g = b.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#e6c487'); g.addColorStop(1, '#f6dfae');
+  b.fillStyle = g; b.fillRect(0, 0, W, H);
+  for (let i = 0; i < 3200; i++) {
+    b.fillStyle = Math.random() < 0.55 ? 'rgba(150,110,60,.16)' : 'rgba(255,255,255,.28)';
+    b.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5);
+  }
+  for (let i = 0; i < 14; i++) {
+    const x = Math.random() * W, y = 230 + Math.random() * 300;
+    b.fillStyle = pick(['#fff4e6', '#f7c6b5', '#e9d8f0']);
+    b.beginPath(); b.ellipse(x, y, 4, 3, Math.random() * 3, 0, Math.PI * 2); b.fill();
+  }
+  b.fillStyle = '#9c6a3c'; b.fillRect(0, 548, W, 52);
+  for (let x = 0; x < W; x += 24) {
+    b.fillStyle = (x / 24) % 2 ? '#b07a47' : '#bc8754';
+    b.fillRect(x + 1, 550, 22, 50);
+    b.fillStyle = 'rgba(60,35,15,.4)'; b.fillRect(x + 5, 560, 2, 2); b.fillRect(x + 5, 588, 2, 2);
+  }
+  b.fillStyle = 'rgba(60,35,15,.25)'; b.fillRect(0, 548, W, 3);
+})();
+
+function waveEdge(base, amp, ph) {
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(W, 0);
+  for (let x = W; x >= 0; x -= 16) ctx.lineTo(x, base + Math.sin(x * 0.02 + ph) * amp + Math.sin(x * 0.051 - ph * 0.6) * amp * 0.6);
+  ctx.closePath();
+}
+function drawWater() {
+  const ty = tideY();
+  const wg = ctx.createLinearGradient(0, ty, 0, ty + 85);
+  wg.addColorStop(0, 'rgba(130,92,50,.42)'); wg.addColorStop(1, 'rgba(130,92,50,0)');
+  ctx.fillStyle = wg; ctx.fillRect(0, ty - 10, W, 95);
+  // retreating foam film
+  waveEdge(ty + 14 + Math.sin(S.t * 1.3) * 6, 4, S.t * 1.1);
+  ctx.fillStyle = 'rgba(234,247,244,.22)'; ctx.fill();
+  waveEdge(ty, 5, S.t * 1.6);
+  const g = ctx.createLinearGradient(0, 0, 0, ty);
+  g.addColorStop(0, '#0d5570'); g.addColorStop(0.65, '#1c97ad'); g.addColorStop(1, '#63d2cf');
+  ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let x = 0; x <= W; x += 16) {
+    const y = ty + Math.sin(x * 0.02 + S.t * 1.6) * 5 + Math.sin(x * 0.051 - S.t * 0.96) * 3;
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2;
+  for (let i = 0; i < 9; i++) {
+    const x = ((i * 137 + S.t * 18) % (W + 80)) - 40, y = 30 + (i * 53) % Math.max(20, ty - 50);
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 14, y - 6, x + 28, y); ctx.stroke();
+  }
+}
+
+/* ---------- characters ---------- */
+function drawFigure(o) {
+  // o: x,y,facing,skin,shirt,shorts,hair,phase,moving,running,liftLeg,hopY,extra
+  ctx.save();
+  ctx.translate(o.x, o.y + (o.hopY || 0));
+  ctx.scale(o.facing * (o.s || 1), o.s || 1);
+  const sw = o.moving ? Math.sin(o.phase) * (o.running ? 10 : 6) : 0;
+  limb(-3, -24, -3 - sw, 0, 6, o.skin);
+  if (o.liftLeg) limb(3, -24, 13, -14, 6, o.skin); else limb(3, -24, 3 + sw, 0, 6, o.skin);
+  ctx.fillStyle = '#ffffff';
+  if (!o.liftLeg) ellipse(5 + sw, 0, 4, 2);
+  ellipse(-1 - sw, 0, 4, 2);
+  ctx.fillStyle = o.shorts; rr(-9, -32, 18, 11, 3);
+  ctx.fillStyle = o.shirt; rr(-9, -52, 18, 22, 6);
+  if (o.liftLeg) {
+    limb(-5, -48, -15, -64, 5, o.skin); limb(5, -48, 15, -64, 5, o.skin);
+  } else if (o.extra !== 'board') {
+    limb(0, -47, -sw * 0.9 + 2, -30, 5, o.skin);
+  }
+  ctx.fillStyle = o.skin; circle(0, -60, 8);
+  ctx.fillStyle = o.hair; ctx.beginPath(); ctx.arc(0, -61.5, 8.4, Math.PI * 0.95, Math.PI * 2.05); ctx.fill();
+  ctx.fillStyle = '#1a1a1a'; circle(4.5, -60, 1.3);
+  if (o.liftLeg) { ctx.fillStyle = '#5a1a1a'; ellipse(6, -55.5, 2, 2.4); }
+  if (o.extra === 'headband') { ctx.fillStyle = '#ff4f8b'; ctx.fillRect(-8.5, -66, 17, 3); }
+  if (o.extra === 'board') {
+    ctx.save(); ctx.translate(0, -38); ctx.rotate(-0.12);
+    ctx.fillStyle = o.board; ellipse(0, 0, 36, 6);
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(-34, -0.5, 68, 1.5);
+    ctx.restore();
+    limb(0, -47, 4, -36, 5, o.skin);
+  }
+  if (o.extra === 'guard') {
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(-5, -52); ctx.lineTo(0, -42); ctx.lineTo(5, -52); ctx.stroke();
+    ctx.fillStyle = '#c0c6cc'; rr(-2, -43, 5, 4, 1.5);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(-3, -47, 6, 2);
+  }
+  ctx.restore();
+}
+
+function drawLying(p) {
+  const s = 0.6 + 0.4 * p.pop;
+  if (p.umbrella) {
+    const ux = p.x - p.facing * 30;
+    shadow(ux + 6, p.y - 2, 38, 10);
+  }
+  ctx.save();
+  ctx.translate(p.x, p.y); ctx.scale(s * p.facing, s);
+  const a = p.towel[0], b = p.towel[1];
+  ctx.fillStyle = a; rr(-42, -12, 84, 24, 3);
+  ctx.fillStyle = b; for (let i = -34; i < 40; i += 16) ctx.fillRect(i, -12, 6, 24);
+  limb(8, -3, 36, -5, 6, p.skin); limb(8, 3, 36, 5, 6, p.skin);
+  ctx.fillStyle = p.shorts; rr(0, -7, 13, 14, 3);
+  ctx.fillStyle = p.shirt; rr(-20, -8, 22, 16, 5);
+  ctx.fillStyle = p.skin; circle(-27, 0, 7.5);
+  ctx.fillStyle = p.hair; ctx.beginPath(); ctx.arc(-27, 0, 7.8, Math.PI * 0.5, Math.PI * 1.5); ctx.fill();
+  ctx.fillStyle = '#111'; ctx.fillRect(-25, -4, 3, 8);
+  ctx.restore();
+  if (p.umbrella) {
+    const ux = p.x - p.facing * 30;
+    limb(ux, p.y - 4, ux, p.y - 70, 3, '#efe6d2');
+    ctx.fillStyle = p.umbrella;
+    ctx.beginPath(); ctx.moveTo(ux - 40, p.y - 62); ctx.quadraticCurveTo(ux, p.y - 104, ux + 40, p.y - 62); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.beginPath(); ctx.moveTo(ux - 12, p.y - 62); ctx.quadraticCurveTo(ux, p.y - 100, ux + 12, p.y - 62); ctx.closePath(); ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(11,34,48,.55)'; ctx.font = '800 13px Nunito, sans-serif'; ctx.textAlign = 'center';
+  const zt = (p.t * 0.8) % 1.5;
+  if (zt < 1.2) ctx.fillText('z', p.x - p.facing * 22 + zt * 10, p.y - 16 - zt * 18);
+}
+
+function drawPerson(p) {
+  if (p.state === 'lying') { drawLying(p); return; }
+  const alpha = p.state === 'paddle' ? Math.max(0, 1 - p.fade / 1.2) : 1;
+  ctx.save(); ctx.globalAlpha = alpha;
+  const fleeing = p.state === 'bitten' && p.hop > 0.45;
+  const running = p.type === 'jogger' || p.state === 'flee' || fleeing;
+  const moving = running || Math.abs(p.vx) + Math.abs(p.vy) > 5;
+  const hopping = p.state === 'bitten' && p.hop <= 0.45;
+  if (p.state !== 'paddle') shadow(p.x, p.y, 13, 4);
+  drawFigure({ x: p.x, y: p.y, facing: p.facing, skin: p.skin, shirt: p.shirt, shorts: p.shorts, hair: p.hair,
+    phase: p.phase, moving, running, liftLeg: hopping || fleeing && Math.sin(p.phase) > 0.6,
+    hopY: hopping ? -Math.abs(Math.sin(p.hop * 14)) * 12 : 0,
+    extra: p.type === 'jogger' ? 'headband' : (p.type === 'surfer' && p.state !== 'bitten') ? 'board' : null, board: p.board });
+  ctx.restore();
+}
+
+function drawTrench(tr) {
+  const s = 0.4 + 0.6 * tr.grow;
+  ctx.save();
+  ctx.globalAlpha = tr.used ? 1 : Math.min(1, tr.life / 2);
+  ctx.fillStyle = '#d1a865'; ellipse(tr.x + 6, tr.y - 9 * s, 30 * s, 7 * s);
+  ctx.fillStyle = '#c29455'; ellipse(tr.x - 8, tr.y - 11 * s, 14 * s, 5 * s);
+  ctx.fillStyle = '#5a3d1e'; ellipse(tr.x, tr.y, 28 * s, 10 * s);
+  ctx.fillStyle = tr.wet ? '#2f7f86' : '#33210f'; ellipse(tr.x, tr.y + 2, 21 * s, 6.5 * s);
+  ctx.restore();
+}
+
+function drawShoreScale() {
+  const ty = tideY();
+  ctx.save();
+  ctx.textAlign = 'left'; ctx.font = '800 12px Nunito, sans-serif'; ctx.fillStyle = 'rgba(11,34,48,.34)';
+  for (const m of [3, 2.5, 2, 1.5, 1]) {
+    const y = ty + 15 + (1 - (m - 1) / 2) * 360;
+    ctx.fillRect(8, y - 1, 8, 2);
+    ctx.fillText('x' + m, 20, y + 4);
+  }
+  ctx.restore();
+}
+
+function drawGuard(g) {
+  const opts = { x: g.x, y: g.y, facing: g.facing, skin: g.skin, shirt: '#e63946', shorts: '#e63946', hair: g.hair,
+    phase: g.phase, s: 1.12, extra: 'guard' };
+  if (g.state === 'trapped') {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(g.x - 50, g.y - 140, 100, 140); ctx.clip();
+    drawFigure(Object.assign(opts, { y: g.y + 40, liftLeg: true, hopY: Math.sin(g.phase) * 2 }));
+    ctx.restore();
+    ctx.fillStyle = '#5a3d1e'; ctx.beginPath(); ctx.ellipse(g.x, g.y, 26, 7, 0, 0, Math.PI); ctx.fill();
+    ctx.fillStyle = '#d1a865'; ctx.beginPath(); ctx.ellipse(g.x, g.y + 3, 30, 5, 0, 0, Math.PI); ctx.fill();
+    if (Math.floor(S.t * 2) % 2 === 0) {
+      ctx.font = '16px "Lilita One", sans-serif'; ctx.textAlign = 'center';
+      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(11,34,48,.85)'; ctx.lineJoin = 'round';
+      ctx.strokeText('HELP!', g.x, g.y - 64); ctx.fillStyle = '#ffffff'; ctx.fillText('HELP!', g.x, g.y - 64);
+    }
+    return;
+  }
+  shadow(g.x, g.y, 14, 4);
+  drawFigure(Object.assign(opts, { moving: g.state !== 'tower', running: g.state === 'chase' }));
+  if (g.whistle > 0 || g.state === 'chase') {
+    const k = (S.t * 4) % 1;
+    ctx.strokeStyle = 'rgba(255,255,255,' + (1 - k).toFixed(2) + ')'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(g.x + g.facing * 8, g.y - 58, 8 + k * 14, -0.7, 0.7); ctx.stroke();
+  }
+}
+
+function drawTower() {
+  const x = TOWER.x, y = TOWER.y;
+  shadow(x, y + 2, 48, 9);
+  ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x - 34, y); ctx.lineTo(x - 28, y - 72); ctx.moveTo(x + 34, y); ctx.lineTo(x + 28, y - 72);
+  ctx.moveTo(x - 31, y - 10); ctx.lineTo(x + 29, y - 62); ctx.moveTo(x + 31, y - 10); ctx.lineTo(x - 29, y - 62); ctx.stroke();
+  ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x - 40, y - 72); ctx.lineTo(x - 84, y); ctx.stroke();
+  ctx.lineWidth = 2; for (let i = 1; i < 6; i++) { const t = i / 6; ctx.beginPath(); ctx.moveTo(x - 40 - 44 * t - 5, y - 72 + 72 * t); ctx.lineTo(x - 40 - 44 * t + 5, y - 72 + 72 * t); ctx.stroke(); }
+  ctx.fillStyle = '#efe6d2'; ctx.fillRect(x - 42, y - 78, 84, 8);
+  ctx.fillStyle = '#ffd23f'; rr(x - 32, y - 120, 64, 44, 4);
+  ctx.fillStyle = '#0b2230'; rr(x - 22, y - 112, 44, 14, 3);
+  ctx.fillStyle = '#e63946'; ctx.fillRect(x - 3, y - 95, 6, 16); ctx.fillRect(x - 8, y - 90, 16, 6);
+  poly([x - 40, y - 118, x, y - 140, x + 40, y - 118]);
+  limb(x + 30, y - 126, x + 30, y - 172, 2.5, '#efe6d2');
+  const flag = S.heat >= 2 ? '#e63946' : '#ffd23f';
+  ctx.fillStyle = flag;
+  const wv = Math.sin(S.t * 6) * 3;
+  poly([x + 31, y - 172, x + 56, y - 166 + wv, x + 31, y - 158]);
+}
+
+function drawWheel(x, y, r, ang, tire, rim) {
+  ctx.save(); ctx.translate(x, y);
+  ctx.strokeStyle = tire; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.rotate(ang); ctx.strokeStyle = rim; ctx.lineWidth = 1.5;
+  for (let i = 0; i < 6; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(r - 2, 0); ctx.stroke(); }
+  ctx.fillStyle = rim; circle(0, 0, 2.6);
+  ctx.restore();
+}
+
+function drawDog() {
+  const d = dog, f = d.facing;
+  const TAN = '#c4823e', DARK = '#2a211b', LEG = '#a8692f';
+  shadow(d.x - f * 4, d.y, 44, 7);
+  ctx.save(); ctx.translate(d.x, d.y); ctx.scale(f, 1);
+  const mv = Math.min(1, d.speed / 80);
+  const st = d.dig > 0 ? Math.sin(S.t * 40) : Math.sin(d.wheel * 1.6) * mv;
+  const bob = Math.abs(Math.sin(d.wheel * 1.6)) * 1.5 * mv;
+  const lunge = d.biteT > 0 ? 6 : 0;
+  if (d.boost > 0 && d.speed > 60) {
+    ctx.strokeStyle = 'rgba(198,244,50,.85)'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) { const yy = -18 - i * 12; ctx.beginPath(); ctx.moveTo(-46 - i * 4, yy); ctx.lineTo(-66 - i * 4 - Math.random() * 12, yy); ctx.stroke(); }
+  }
+  drawWheel(-18, -15, 14, d.wheel, '#3a3a3a', '#7d868b');
+  limb(19, -26 - bob, 19 - st * 7, -1, 5, LEG);
+  ctx.strokeStyle = '#c9d2d6'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-22, -14); ctx.lineTo(-6, -31); ctx.lineTo(-28, -36); ctx.closePath(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-6, -31); ctx.lineTo(10, -33); ctx.stroke();
+  ctx.fillStyle = DARK;
+  ctx.beginPath(); ctx.moveTo(-20, -38); ctx.quadraticCurveTo(-42, -38 - st * 4, -46, -22 + st * 2);
+  ctx.quadraticCurveTo(-36, -30, -18, -31); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = TAN; ellipse(0, -35 - bob, 26, 12);
+  ctx.fillStyle = '#dca46b'; ellipse(3, -27 - bob, 18, 5);
+  ctx.fillStyle = DARK; ellipse(-4, -41 - bob, 21, 7);
+  ctx.fillStyle = LEG; ellipse(-21, -25, 7, 4); ellipse(-26, -21, 5, 3);
+  ctx.strokeStyle = '#ff6a3d'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-8, -46 - bob); ctx.lineTo(-10, -26); ctx.moveTo(13, -46 - bob); ctx.lineTo(13, -25 - bob); ctx.stroke();
+  // head
+  ctx.save(); ctx.translate(lunge + (d.dig > 0 ? 3 : 0), -bob + (d.dig > 0 ? 7 : 0));
+  ctx.fillStyle = TAN; poly([12, -42, 26, -60, 36, -48, 22, -28]);
+  ellipse(31, -54, 11, 9);
+  ctx.fillStyle = DARK;
+  poly([23, -59, 26, -77, 32, -61]);
+  poly([29, -61, 35, -76, 38, -58]);
+  ctx.fillStyle = '#e8a0a0'; poly([25.5, -61, 26.5, -71, 29.5, -61]);
+  const open = d.biteT > 0;
+  ctx.save(); ctx.translate(36, -50); ctx.rotate(open ? -0.35 : 0);
+  ctx.fillStyle = DARK; poly([0, -8, 14, -3.5, 14, 1, 0, 1]);
+  ctx.fillStyle = '#111'; circle(14, -2.5, 2.6);
+  if (open) { ctx.fillStyle = '#fff'; poly([5, 1, 7, 4, 9, 1]); poly([10, 1, 11.5, 3.5, 13, 1]); }
+  ctx.restore();
+  ctx.save(); ctx.translate(36, -49); ctx.rotate(open ? 0.45 : 0);
+  ctx.fillStyle = DARK; poly([0, 0, 12, 1, 10, 4.5, -1, 4]);
+  if (open) { ctx.fillStyle = '#fff'; poly([6, 0.5, 7.5, -2.5, 9, 0.5]); }
+  ctx.restore();
+  if (!open && d.speed > 90) { ctx.fillStyle = '#ff7a8a'; ellipse(42, -44 + Math.sin(S.t * 12), 3, 4.5); }
+  ctx.fillStyle = '#1a1208'; circle(33, -57, 1.9);
+  ctx.fillStyle = '#fff'; circle(33.6, -57.6, 0.6);
+  ctx.restore();
+  limb(12, -26 - bob, 12 + st * 7, -1, 5, TAN);
+  ctx.fillStyle = TAN; ellipse(14 + st * 7, -1, 4, 2);
+  drawWheel(-23, -14, 14, d.wheel, '#1d1d1d', '#e3e8ea');
+  ctx.restore();
+  if (d.stun > 0) {
+    ctx.fillStyle = '#ffd23f'; ctx.font = '16px "Lilita One", sans-serif'; ctx.textAlign = 'center';
+    for (let i = 0; i < 3; i++) {
+      const a = S.t * 6 + i * 2.1;
+      ctx.fillText('★', d.x + f * 20 + Math.cos(a) * 18, d.y - 84 + Math.sin(a) * 5);
+    }
+  }
+}
+
+function drawBall(b) {
+  const bounce = Math.abs(Math.sin(b.t * 5)) * 8;
+  shadow(b.x, b.y, 8 - bounce * 0.3, 3);
+  ctx.fillStyle = '#c6f432'; circle(b.x, b.y - 8 - bounce, 7);
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(b.x - 7, b.y - 8 - bounce, 7, -0.9, 0.9); ctx.stroke();
+  ctx.beginPath(); ctx.arc(b.x + 7, b.y - 8 - bounce, 7, Math.PI - 0.9, Math.PI + 0.9); ctx.stroke();
+  if (b.t > 7 && Math.floor(b.t * 6) % 2) { ctx.fillStyle = 'rgba(255,255,255,.4)'; circle(b.x, b.y - 8 - bounce, 7); }
+}
+
+/* ---------- HUD ---------- */
+function panel(x, y, w, h) { ctx.fillStyle = 'rgba(11,34,48,.78)'; rr(x, y, w, h, 10); }
+function hud() {
+  ctx.save();
+  ctx.textBaseline = 'alphabetic';
+  panel(14, 12, 176, 62);
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#9cc3c9'; ctx.font = '800 11px Nunito, sans-serif'; ctx.fillText('SCORE', 28, 31);
+  ctx.fillStyle = '#ffffff'; ctx.font = '32px "Lilita One", sans-serif'; ctx.fillText(String(S.score), 27, 64);
+  if (S.combo > 1) {
+    panel(198, 12, 92, 62);
+    ctx.fillStyle = '#ffd23f'; ctx.font = '30px "Lilita One", sans-serif'; ctx.fillText('x' + S.combo, 212, 50);
+    ctx.fillStyle = 'rgba(255,255,255,.2)'; rr(212, 58, 64, 6, 3);
+    ctx.fillStyle = '#ffd23f'; rr(212, 58, Math.max(6, 64 * S.comboT / COMBO_WINDOW), 6, 3);
+  }
+  panel(W - 150, 12, 136, 62);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#9cc3c9'; ctx.font = '800 11px Nunito, sans-serif'; ctx.fillText('TIME LEFT', W - 28, 31);
+  const secs = Math.ceil(S.time);
+  ctx.fillStyle = secs <= 10 ? '#ff6a3d' : '#ffffff'; ctx.font = '32px "Lilita One", sans-serif';
+  ctx.fillText('0:' + String(secs).padStart(2, '0'), W - 27, 64);
+  panel(W - 150, 80, 136, 40);
+  ctx.fillStyle = '#9cc3c9'; ctx.font = '800 10px Nunito, sans-serif'; ctx.textAlign = 'left';
+  const chasing = guards.filter(g => g.state === 'chase').length;
+  const trapped = guards.some(g => g.state === 'trapped');
+  const returning = guards.some(g => g.state === 'return');
+  const gs = chasing ? (chasing > 1 ? 'BOTH CHASING' : 'CHASING!') : trapped ? 'IN A HOLE' : returning ? 'GOING BACK' : 'ON TOWER';
+  ctx.fillText('LIFEGUARDS', W - 138, 96);
+  ctx.textAlign = 'right'; ctx.fillStyle = chasing ? '#ff6a3d' : trapped ? '#c6f432' : '#ffffff'; ctx.fillText(gs, W - 26, 96);
+  ctx.fillStyle = 'rgba(255,255,255,.18)'; rr(W - 138, 104, 112, 6, 3);
+  const hf = Math.min(1, S.heat / HEAT_MAX);
+  if (hf > 0.02) { ctx.fillStyle = S.heat >= 2 ? '#ff6a3d' : '#ffd23f'; rr(W - 138, 104, Math.max(6, 112 * hf), 6, 3); }
+  ctx.fillStyle = 'rgba(255,255,255,.7)';
+  for (const g of guards) ctx.fillRect(W - 138 + 112 * g.need / HEAT_MAX, 102, 2, 10);
+  panel(14, H - 44, 150, 32);
+  ctx.textAlign = 'left'; ctx.fillStyle = '#9cc3c9'; ctx.font = '800 11px Nunito, sans-serif';
+  ctx.fillText('DIG (SPACE)', 26, H - 23);
+  const free = 3 - S.trenches.filter(t => !t.used).length;
+  for (let i = 0; i < 3; i++) { ctx.fillStyle = i < free ? '#c6f432' : 'rgba(255,255,255,.2)'; circle(118 + i * 14, H - 27, 5); }
+  if (dog.boost > 0) {
+    panel(172, H - 44, 130, 32);
+    ctx.fillStyle = '#c6f432'; ctx.font = '800 12px Nunito, sans-serif';
+    ctx.fillText('ZOOMIES ' + dog.boost.toFixed(1) + 's', 184, H - 23);
+  }
+  ctx.restore();
+}
+
+/* ---------- main draw ---------- */
+function draw() {
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  if (S.shake > 0) ctx.translate(rnd(-4, 4) * S.shake * 6, rnd(-4, 4) * S.shake * 6);
+  ctx.drawImage(bg, 0, 0, W, H);
+  drawWater();
+  drawShoreScale();
+  for (const tr of S.trenches) drawTrench(tr);
+  const items = [];
+  for (const p of S.people) items.push({ y: p.y, fn: () => drawPerson(p) });
+  items.push({ y: dog.y, fn: drawDog });
+  for (const g of guards) items.push({ y: g.y + 0.1, fn: () => drawGuard(g) });
+  items.push({ y: TOWER.y, fn: drawTower });
+  if (S.ball) items.push({ y: S.ball.y, fn: () => drawBall(S.ball) });
+  items.sort((a, b) => a.y - b.y);
+  for (const it of items) it.fn();
+  for (const f of S.fx) { ctx.globalAlpha = 1 - f.t / f.life; ctx.fillStyle = f.c; circle(f.x, f.y, f.r); }
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'center';
+  for (const tx of S.texts) {
+    ctx.globalAlpha = Math.max(0, 1 - tx.t / tx.life);
+    ctx.font = tx.size + 'px "Lilita One", sans-serif';
+    ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(11,34,48,.85)'; ctx.lineJoin = 'round';
+    ctx.strokeText(tx.txt, tx.x, tx.y); ctx.fillStyle = tx.col; ctx.fillText(tx.txt, tx.x, tx.y);
+  }
+  ctx.globalAlpha = 1;
+  if (S.mode !== 'title') hud();
+}
+
+reset();
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (S.mode !== 'paused') update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+showOverlay('75-second round', "Judith's Beach Day",
+  'Roll Judith’s wheelchair across the sand, nip ankles near the water for bigger points, and dig trenches to trap the lifeguards.',
+  'Start rolling', true);
+})();
+</script>
+
+</body>
+</html>
